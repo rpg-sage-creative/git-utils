@@ -1,7 +1,9 @@
-# rpg-sage-creative/x-utils
+# rpg-sage-creative/git-utils
 
 This repo is a utils collection for RSC projects.
 It's purpose is simply to provide reusable code.
+
+This repo uses `node:child_process` to run various git related commands against a given repo.
 
 ## Node
 
