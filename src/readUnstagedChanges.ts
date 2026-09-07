@@ -1,7 +1,7 @@
 import { noop } from "@rsc-utils/type-utils";
 import { execCli } from "./internal/execCli.js";
 
-export async function readUnstagedChanges(repoPath: string): Promise<string[] | undefined> {
+export async function readUnstagedChanges(repoPath: string): Promise<string[]> {
 	const output = await execCli("git diff-files --ignore-space-at-eol", repoPath).catch(noop);
 	if (typeof(output) === "string") {
 		return output

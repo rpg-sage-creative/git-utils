@@ -1,1 +1,1 @@
-export declare function readUnstagedChanges(repoPath: string): Promise<string[] | undefined>;
+export declare function readUnstagedChanges(repoPath: string): Promise<string[]>;

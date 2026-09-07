@@ -1,4 +1,5 @@
 import { execCli } from "./internal/execCli.js";
+/** Uses `git log -1 --pretty=format:""` to parse information about the current commit for the given repoPath. */
 export async function readCommit(repoPath) {
     const splitter = "_*|*_";
     const keyMap = {
