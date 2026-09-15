@@ -10,17 +10,22 @@ async function readBuildDate(repoPath) {
     return new Promise(resolve => stat(join(repoPath, "build"), (err, stats) => resolve(err ? undefined : { birthtimeMs: stats.birthtimeMs, ctimeMs: stats.ctimeMs }))).catch(() => undefined);
 }
 async function readRscUtilsPackages(rootPath) {
-    const packages = [];
-    const utilPath = join(rootPath, "node_modules", "@rsc-utils");
-    const allNames = await new Promise(resolve => readdir(utilPath, (err, files) => resolve(err ? [] : files))).catch(() => []);
-    const validNames = allNames.filter(dirName => dirName !== ".");
-    for (const libName of validNames) {
-        const pkg = await readPackageJson(join(utilPath, libName));
-        if (pkg) {
-            packages.push({ name: pkg.name, version: pkg.version });
+    const packageMap = new Map();
+    const nodeModulesPath = join(rootPath, "node_modules", "@rsc-utils");
+    const packagesPath = join(rootPath, "packages", "@rsc-utils");
+    const utilPaths = [packagesPath, nodeModulesPath,];
+    for (const utilPath of utilPaths) {
+        const fileNames = await new Promise(resolve => readdir(utilPath, (err, files) => resolve(err ? [] : files))).catch(() => []);
+        const utilNames = fileNames.filter(dirName => dirName !== ".");
+        for (const utilName of utilNames) {
+            const pkg = await readPackageJson(join(utilPath, utilName));
+            if (pkg) {
+                packageMap.set(pkg.name, { name: pkg.name, version: pkg.version });
+            }
         }
     }
-    return packages;
+    const keys = Array.from(packageMap.keys()).sort();
+    return keys.map(key => packageMap.get(key));
 }
 export async function readRepo(repoPath) {
     return {

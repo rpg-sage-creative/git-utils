@@ -27,22 +27,28 @@ async function readBuildDate(repoPath: string): Promise<BuildDate | undefined> {
 }
 
 async function readRscUtilsPackages(rootPath: string): Promise<PackageJson[]> {
-	const packages: PackageJson[] = [];
+	const packageMap = new Map<string, PackageJson>();
 
-	const utilPath = join(rootPath, "node_modules", "@rsc-utils");
+	const nodeModulesPath = join(rootPath, "node_modules", "@rsc-utils");
+	const packagesPath = join(rootPath, "packages", "@rsc-utils");
+	const utilPaths = [packagesPath, nodeModulesPath,];
 
-	const allNames = await new Promise<string[]>(resolve =>
-		readdir(utilPath, (err, files) => resolve(err ? [] : files))
-	).catch(() => []);
+	for (const utilPath of utilPaths) {
+		const fileNames = await new Promise<string[]>(resolve =>
+			readdir(utilPath, (err, files) => resolve(err ? [] : files))
+		).catch(() => []);
 
-	const validNames = allNames.filter(dirName => dirName !== ".");
-	for (const libName of validNames) {
-		const pkg = await readPackageJson(join(utilPath, libName));
-		if (pkg) {
-			packages.push({ name:pkg.name, version:pkg.version });
+		const utilNames = fileNames.filter(dirName => dirName !== ".");
+		for (const utilName of utilNames) {
+			const pkg = await readPackageJson(join(utilPath, utilName));
+			if (pkg) {
+				packageMap.set(pkg.name, { name:pkg.name, version:pkg.version });
+			}
 		}
 	}
-	return packages;
+
+	const keys = Array.from(packageMap.keys()).sort();
+	return keys.map(key => packageMap.get(key)!);
 }
 
 type GitRepoData = {
